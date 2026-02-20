@@ -1,0 +1,602 @@
+[
+    {
+        "id": 3500,
+        "input_text": "pelayanan nya sangat ramah . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3501,
+        "input_text": "sayang wifi tidak bagus harus keluar kamar . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3502,
+        "input_text": "tulisannya twin bed , tetapi yang ada kamarnya beda . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3503,
+        "input_text": "over all baik , hanya sja akan lebih memuaskan jika air hot waternya bisa nyala 24jam . kmrin hanya wakt . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3504,
+        "input_text": "fasilatas sesuia . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3505,
+        "input_text": "dekat akses transportasi . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3506,
+        "input_text": "kamar bagus seasui bajet . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3507,
+        "input_text": "pelayanannya ramah , sudah langganan untuk menghinap dan beristirahat di sini . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3508,
+        "input_text": "pelayanan kamar perlu di tingkatkan . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3509,
+        "input_text": "nasi gorengnya enak . mungkin saya lapar . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3510,
+        "input_text": "ac kurang dingin . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3511,
+        "input_text": "kamarnya butuh perbaikan . dinding kamar dan pintupintu . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3512,
+        "input_text": "harga pas di kantong , kamar sudah memadai . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3513,
+        "input_text": "lokasi kamar terpencil . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3514,
+        "input_text": "tempatnya nyaman , jauh dari kebisingan lalu lintas kendaraan . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3515,
+        "input_text": "setiap mau check in pasti dihotel ini , karena pelayanannya sangat baik . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3516,
+        "input_text": "sangat baik pelayanan nya . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3517,
+        "input_text": "saya sangat sering menggunakan airy room , sehingga sudah tahu apa saja fasilitas yang biasanya ada . cemilan yang ada juga hanya setengah dari pada biasanya . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3518,
+        "input_text": "sesuai budget . dekat dengan bandara . cocok buat yang penerbangan pagi . disediakan antar jemput ke dan dari bandara . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3519,
+        "input_text": "pelayan nya tidak sopan . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3520,
+        "input_text": "cukup hanya lift nya di perbaiki . karena sudah kelihatan sudah lama sekali . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3521,
+        "input_text": "hanya saja ruangan terlalu sempit . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3522,
+        "input_text": "untuk koneksi wifi lebih di tingkatkan lagi . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3523,
+        "input_text": "pelayanannya perlu ditingkatkan lagi agar lebih baik lagi . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3524,
+        "input_text": "ac nya kurang dingin di kamar 515 . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3525,
+        "input_text": "keramahan staf hotel ditingkatkan lagi . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3526,
+        "input_text": "alhamdulillah baik pelayanannya . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3527,
+        "input_text": "manajemennya tidak bagus karena sudah beli kamar tetapi bahkan kamar saya di jual ke pihak yang lain . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3528,
+        "input_text": "berkesan karena dekat kemana - mana tetapi yang buat saya kecewa kamarnya jorok . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3529,
+        "input_text": "resepsionis selalu ada . tetapi entah jika ada peraturan sop gorden dari airy nya . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3530,
+        "input_text": "sayang , breakfastnya sudah ditiadakan oleh airy . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3531,
+        "input_text": "parkiran cukup luas . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3532,
+        "input_text": "mengapa breakfast di tiadakan hufft . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3533,
+        "input_text": "kamar biasa saja . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3534,
+        "input_text": "pas mau breakfast soto madura sudah tidak ada dagingnya sama sekali , kuah juga keasinan , tetapi untung ada pilihan breakfast lainnya . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3535,
+        "input_text": "tidak adda hanger nya sama sekali , susah untuk gantung pakaian di lemari . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3536,
+        "input_text": "keseluruhan bagus , cocok untuk tempat singgah . smoking area diparkiran , yang dilantai 2 ribet turun naiknya kalau mau merokok . remote tv nya kemana iya ? [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3537,
+        "input_text": "ac tidak dingin . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3538,
+        "input_text": "wifi jelek . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3539,
+        "input_text": "pelayanannya cepat . saya pas kesitu lagi ada renovasi . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3540,
+        "input_text": "untuk resepsionis perlu di perbaiki supaya lebih ramah dan sopan terimakasih . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3541,
+        "input_text": "ada kolam renangnya yang buat anak senang . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3542,
+        "input_text": "alhamdulillah tempatnya nyaman . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3543,
+        "input_text": "tv yang disediakan lebih besar dibanding airy room lain di kelasy ( eco , dan harga sama ) . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3544,
+        "input_text": "dilayani dengan baik . check in lebih awal tidak kena biaya . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3545,
+        "input_text": "wifi tolong di perbaiki untuk kenyamanan . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3546,
+        "input_text": "air panas tidaj jalan . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3547,
+        "input_text": "sayang kamar mandi bau . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3548,
+        "input_text": "semuanya oke . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    },
+    {
+        "id": 3549,
+        "input_text": "lampunya kurang terang . [A] [O] [S]",
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "error": "Invalid JSON format"
+            }
+        ],
+        "notes": ""
+    }
+]
