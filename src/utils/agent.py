@@ -100,7 +100,8 @@ class ABSASystem:
 		
 		# Generate
 		outputs = self.llm.generate([full_prompt], self.extractor_params, use_tqdm=False)
-		result = self._parse_json(outputs[0].outputs[0].text)
+		parsed_reasoning = self._parse_reasoning_output(outputs[0].outputs[0].text)
+		result = self._parse_json(parsed_reasoning["content"])
 		
 		if not isinstance(result, list):
 			return [{"error": "Invalid JSON format"}]
@@ -117,7 +118,8 @@ class ABSASystem:
 		
 		# Generate
 		outputs = self.llm.generate([full_prompt], self.evaluator_params, use_tqdm=False)
-		result = self._parse_json(outputs[0].outputs[0].text)
+		parsed_reasoning = self._parse_reasoning_output(outputs[0].outputs[0].text)
+		result = self._parse_json(parsed_reasoning["content"])
 		
 		if not isinstance(result, dict) or "is_correct" not in result:
 			return {"is_correct": True, "reasoning": "Parser failed", "critique": ""}

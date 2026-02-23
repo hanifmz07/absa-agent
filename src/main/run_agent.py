@@ -23,7 +23,7 @@ def save_results_to_csv(results: List[Dict], filename: str):
     print(f"\nResults saved to {filename}")
 
 def main():
-    model_path = "Qwen/Qwen3-0.6B" 
+    model_path = "Qwen/Qwen3-4B" 
     print(f"Initializing ABSA System with {model_path}...")
     system = ABSASystem(model_path, prompts_dir="prompts")
 
@@ -31,8 +31,11 @@ def main():
     test_case_path = 'dataset/hoasa_hotel/indo/mvp_aos/test.json'
     with open(test_case_path, 'r', encoding='utf-8') as f:
         test_cases = json.load(f)
-    # Take first 50 test cases for quick testing
-    test_cases = test_cases[:50]
+    # Take first 5 test cases for quick testing
+    test_cases = test_cases[4:10]
+    # Remove '[A] [O] [S]' from input text
+    for case in test_cases:
+        case['input'] = case['input'].replace('[A] [O] [S]', '').strip()
     results = []
 
     print(f"\nStarting benchmark on {len(test_cases)} test cases...\n")
