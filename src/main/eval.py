@@ -1,21 +1,24 @@
 from ..utils.eval_utils import calculate_metrics
 import torch
 import json
+import logging
 from tqdm import tqdm
 import os, re
 import argparse
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from ..utils.constrained_decoding import MVPConstrainedDecoder, GASConstrainedDecoder, LegoABSAConstrainedDecoder
 
+logger = logging.getLogger(__name__)
+
 def main(args):
     # === Load Model ===
-    print(f'Model Path: {args.model_path}')
+    logger.info(f'Model Path: {args.model_path}')
     tokenizer = AutoTokenizer.from_pretrained(args.model_path, padding_side="left")
     model = AutoModelForCausalLM.from_pretrained(args.model_path, device_map="auto")
 
-    print("Tokenizer length:", len(tokenizer))
-    print("Embedding size:", model.get_input_embeddings().weight.shape)
-    print("Special Tokens:", tokenizer.special_tokens_map)
+    logger.info(f"Tokenizer length: {len(tokenizer)}")
+    logger.info(f"Embedding size: {model.get_input_embeddings().weight.shape}")
+    logger.info(f"Special Tokens: {tokenizer.special_tokens_map}")
 
     # === Setup Device ===
     model.eval()
@@ -179,20 +182,20 @@ def main(args):
     )
     scaled_result_metrics = {key: value * 100 for key, value in result_metrics.items()}
     
-    print("Evaluation results:", scaled_result_metrics)
+    logger.info(f"Evaluation results: {scaled_result_metrics}")
 
     # Save the metric results
     output_file = os.path.join(output_dir, "evaluation_results.json")
     with open(output_file, "w") as f:
         json.dump(scaled_result_metrics, f, indent=4)
-    print(f"Evaluation results saved to {output_file}")
+    logger.info(f"Evaluation results saved to {output_file}")
 
     # Save inference results if specified
     if args.save_predictions:
         inference_output_file = os.path.join(output_dir, "inference_results.json")
         with open(inference_output_file, "w") as f:
             json.dump(inference_results, f, indent=4)
-        print(f"Inference results saved to {inference_output_file}")
+        logger.info(f"Inference results saved to {inference_output_file}")
 
 if __name__ == "__main__":
 
