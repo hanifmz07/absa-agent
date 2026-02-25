@@ -72,7 +72,16 @@ def _normalise(triplets: List[Dict], lowercase: bool) -> List[Dict]:
     Returns:
         Normalised copy of *triplets*.
     """
+    # Convert null values to "null"
+    for t in triplets:
+        for k, v in t.items():
+            if v is None:
+                t[k] = "null"
+
+    # Add space for punctuations
     result = punctuation_triplets(triplets)
+
+    # Lowercase if needed
     if lowercase:
         result = lower_triplets(result)
     return result
@@ -286,7 +295,7 @@ if __name__ == "__main__":
         "--runner_type",
         type=str,
         default="async",
-        choices=["async", "sequential", "batch"],
+        choices=["async", "sequential", "batch", 'async_0.6B'],
         help="Type of ABSA agent runner used to generate the results (default: %(default)s).",
     )
     parser.add_argument(

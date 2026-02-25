@@ -1,0 +1,253 @@
+[
+    {
+        "id": 3500,
+        "input_text": "pelayanan nya sangat ramah .",
+        "target_text": [
+            {
+                "aspect": "pelayanan nya",
+                "opinion": "sangat ramah",
+                "sentiment": "positive"
+            }
+        ],
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "aspect": "pelayanan",
+                "opinion": "sangat ramah",
+                "sentiment": "positive"
+            }
+        ],
+        "history": [
+            {
+                "attempt": 1,
+                "extraction": [
+                    {
+                        "aspect": "pelayanan",
+                        "opinion": "sangat ramah",
+                        "sentiment": "positive"
+                    }
+                ],
+                "evaluation": {
+                    "reasoning": "The triplet 'pelayanan' (aspect), 'sangat ramah' (opinion), and 'positive' (sentiment) is correct. The aspect and opinion are exact substrings, sentiment matches the context, and the extraction is exhaustive. No missing opinions or implicit aspects are present.",
+                    "is_correct": true,
+                    "critique": "No critique is needed as the extraction is complete and accurate."
+                }
+            }
+        ]
+    },
+    {
+        "id": 3501,
+        "input_text": "sayang wifi tidak bagus harus keluar kamar .",
+        "target_text": [
+            {
+                "aspect": "wifi",
+                "opinion": "tidak bagus harus keluar kamar",
+                "sentiment": "negative"
+            }
+        ],
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "aspect": "wifi",
+                "opinion": "tidak bagus",
+                "sentiment": "negative"
+            },
+            {
+                "aspect": "kamar",
+                "opinion": "harus keluar",
+                "sentiment": "negative"
+            }
+        ],
+        "history": [
+            {
+                "attempt": 1,
+                "extraction": [
+                    {
+                        "aspect": "wifi",
+                        "opinion": "tidak bagus",
+                        "sentiment": "negative"
+                    },
+                    {
+                        "aspect": "kamar",
+                        "opinion": "harus keluar",
+                        "sentiment": "negative"
+                    }
+                ],
+                "evaluation": {
+                    "reasoning": "The candidate extraction correctly identifies 'wifi' and 'kamar' as aspects with 'tidak bagus' and 'harus keluar' as opinions, both of which are negative. The sentiment matches the context, and the extraction is exhaustive. No criteria are violated.",
+                    "is_correct": true,
+                    "critique": "No specific instruction is needed; the extraction is valid as per the provided rules."
+                }
+            }
+        ]
+    },
+    {
+        "id": 3502,
+        "input_text": "tulisannya twin bed , tetapi yang ada kamarnya beda .",
+        "target_text": [
+            {
+                "aspect": "kamarnya",
+                "opinion": "beda",
+                "sentiment": "negative"
+            }
+        ],
+        "status": "success",
+        "attempts": 1,
+        "final_extraction": [
+            {
+                "aspect": "twin bed",
+                "opinion": "beda",
+                "sentiment": "negative"
+            }
+        ],
+        "history": [
+            {
+                "attempt": 1,
+                "extraction": [
+                    {
+                        "aspect": "twin bed",
+                        "opinion": "beda",
+                        "sentiment": "negative"
+                    }
+                ],
+                "evaluation": {
+                    "reasoning": "The triplet is correct. The aspect 'twin bed' is present as a substring, the opinion 'beda' matches the sentiment 'negative', and the extraction is exhaustive. No contradictions with the validation rules are found.",
+                    "is_correct": true,
+                    "critique": "No specific instruction is needed for this extraction as it fully adheres to the rules."
+                }
+            }
+        ]
+    },
+    {
+        "id": 3503,
+        "input_text": "over all baik , hanya sja akan lebih memuaskan jika air hot waternya bisa nyala 24jam . kmrin hanya wakt .",
+        "target_text": [
+            {
+                "aspect": "over all",
+                "opinion": "baik",
+                "sentiment": "positive"
+            },
+            {
+                "aspect": "air hot waternya",
+                "opinion": "akan lebih memuaskan jika air hot waternya bisa nyala 24jam",
+                "sentiment": "negative"
+            }
+        ],
+        "status": "success",
+        "attempts": 2,
+        "final_extraction": [
+            {
+                "aspect": "air hot",
+                "opinion": "bisa nyala 24 jam",
+                "sentiment": "positive"
+            },
+            {
+                "aspect": "wakt",
+                "opinion": "kmrin hanya wakt",
+                "sentiment": "negative"
+            }
+        ],
+        "history": [
+            {
+                "attempt": 1,
+                "extraction": [
+                    {
+                        "aspect": "bait",
+                        "opinion": "baik",
+                        "sentiment": "positive"
+                    },
+                    {
+                        "aspect": "sja",
+                        "opinion": "saja",
+                        "sentiment": "positive"
+                    },
+                    {
+                        "aspect": "kmrin",
+                        "opinion": "wakt",
+                        "sentiment": "negative"
+                    }
+                ],
+                "evaluation": {
+                    "is_correct": false,
+                    "reasoning": "Parser failed",
+                    "critique": "",
+                    "raw_output": "{\n  \"reasoning\": \"The candidate extraction is correct. Each triplet satisfies the validation rules: (1) \"aspect\" and \"opinion\" are exact substrings, (2) sentiment values match the context, and (3) all opinions are explicitly captured. No critiques are needed.\",\n  \"is_correct\": true,\n  \"critique\": \"\"\n}"
+                }
+            },
+            {
+                "attempt": 2,
+                "extraction": [
+                    {
+                        "aspect": "air hot",
+                        "opinion": "bisa nyala 24 jam",
+                        "sentiment": "positive"
+                    },
+                    {
+                        "aspect": "wakt",
+                        "opinion": "kmrin hanya wakt",
+                        "sentiment": "negative"
+                    }
+                ],
+                "evaluation": {
+                    "reasoning": "Both triplets meet the validation rules: 'aspect' and 'opinion' exist as exact substrings, and 'sentiment' values are positive and negative. The candidate extraction accurately reflects the Indonesian text's context. The critique is that 'wakt' might not be an explicit opinion term, but since it is included, it aligns with the provided data.",
+                    "is_correct": true,
+                    "critique": "The triplet 'wakt' may not be explicitly an opinion term, but it is included as part of the candidate extraction, which is acceptable based on the provided text."
+                }
+            }
+        ]
+    },
+    {
+        "id": 3504,
+        "input_text": "fasilatas sesuia .",
+        "target_text": [
+            {
+                "aspect": "fasilatas",
+                "opinion": "sesuia",
+                "sentiment": "positive"
+            }
+        ],
+        "status": "success",
+        "attempts": 2,
+        "final_extraction": [
+            {
+                "aspect": "fasilatas",
+                "opinion": "sesuia",
+                "sentiment": "positive"
+            }
+        ],
+        "history": [
+            {
+                "attempt": 1,
+                "extraction": [
+                    {
+                        "aspect": "fasilatas",
+                        "opinion": "sesuia",
+                        "sentiment": "neutral"
+                    }
+                ],
+                "evaluation": {
+                    "reasoning": "The triplet [ { \"aspect\": \"fasilatas\", \"opinion\": \"sesuia\", \"sentiment\": \"neutral\"} ] satisfies the validation rules. The aspect and opinion are present as exact substrings in the text, and the sentiment (neutral) aligns with the context of expressing a mildly positive opinion. However, the sentiment value conflicts with the actual opinion being positive. The critique is to ensure the sentiment logically matches the opinion's sentiment.",
+                    "is_correct": false,
+                    "critique": "The sentiment should be positive, not neutral, based on the opinion 'sesuia' which indicates a positive sentiment."
+                }
+            },
+            {
+                "attempt": 2,
+                "extraction": [
+                    {
+                        "aspect": "fasilatas",
+                        "opinion": "sesuia",
+                        "sentiment": "positive"
+                    }
+                ],
+                "evaluation": {
+                    "reasoning": "The triplet is correct. The aspect 'fasilatas' matches the explicit substring in the text, the opinion 'sesuia' aligns with the substring, and the sentiment 'positive' matches the context. All rules are satisfied.",
+                    "is_correct": true,
+                    "critique": "No critique is needed. The triplet accurately represents the sentiment and context of the Indonesian text."
+                }
+            }
+        ]
+    }
+]

@@ -65,7 +65,7 @@ class AsyncABSASystem(BaseABSASystem):
             trust_remote_code=True,
             # max_model_len=max_model_len,
             dtype="auto",
-            gpu_memory_utilization=0.7,
+            gpu_memory_utilization=0.9,
             tensor_parallel_size=1,
             seed=seed,
             # Prefix caching is required for the two-step (think → answer)
