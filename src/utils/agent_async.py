@@ -16,7 +16,7 @@ import os
 import uuid
 import asyncio
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, Tuple
 import torch
 
 from vllm.engine.arg_utils import AsyncEngineArgs
@@ -51,12 +51,21 @@ class AsyncABSASystem(BaseABSASystem):
         model_name: HuggingFace model ID or local path to the LLM weights.
         prompts_dir: Directory containing the Markdown prompt templates.
         max_model_len: Maximum sequence length (in tokens) for the engine.
+        track_tokens: When ``True``, each generation call records the number
+            of input, thinking, and output tokens.  The per-review totals are
+            included under a ``"token_usage"`` key in the dict returned by
+            :meth:`process_review`, and per-attempt breakdowns are included
+            in the ``"history"`` list.  Set to ``False`` (the default) to
+            skip all counting overhead.
     """
 
-    def __init__(self, model_name: str, prompts_dir: str = "prompts", max_model_len: int = 4096, seed: int = 42):
+    def __init__(self, model_name: str, prompts_dir: str = "prompts", max_model_len: int = 4096, seed: int = 42, track_tokens: bool = False):
         super().__init__(model_name, prompts_dir)
 
         logger.info(f"Initializing Async vLLM Engine: {model_name}")
+
+        #: Enable / disable per-generation token counting.
+        self.track_tokens: bool = track_tokens
 
         # Build engine arguments; max_model_len is kept commented out so the
         # engine auto-detects the context window from the model config.
@@ -80,7 +89,7 @@ class AsyncABSASystem(BaseABSASystem):
         self.thinking_params = SamplingParams(
             temperature=0.6,
             top_p=0.95,
-            max_tokens=4096,
+            max_tokens=8192,
             stop=["</think>"],
             include_stop_str_in_output=True,  # Keep the closing tag in the prompt prefix
         )
@@ -101,18 +110,24 @@ class AsyncABSASystem(BaseABSASystem):
             max_tokens=2048,
         )
 
-    async def _generate(self, prompt: str, sampling_params: SamplingParams) -> str:
+    async def _generate(
+        self, prompt: str, sampling_params: SamplingParams
+    ) -> Tuple[str, Optional[Dict[str, int]]]:
         """Submit a single generation request to the vLLM async engine.
 
         Iterates over the async generator returned by the engine and returns
-        only the final (complete) output text.
+        only the final (complete) output text, optionally accompanied by a
+        token-usage breakdown.
 
         Args:
             prompt: The fully formatted text prompt to send to the model.
             sampling_params: vLLM ``SamplingParams`` controlling decoding.
 
         Returns:
-            The generated text string from the first output sequence.
+            A 2-tuple ``(text, usage)`` where *text* is the generated string
+            and *usage* is either a dict
+            ``{"input_tokens": int, "thinking_tokens": int, "output_tokens": int}``
+            when :attr:`track_tokens` is ``True``, or ``None`` otherwise.
         """
         request_id = str(uuid.uuid4())
         results_generator = self.engine.generate(prompt, sampling_params, request_id)
@@ -123,9 +138,21 @@ class AsyncABSASystem(BaseABSASystem):
         async for request_output in results_generator:
             final_output = request_output
 
-        return final_output.outputs[0].text
+        text = final_output.outputs[0].text
+
+        usage: Optional[Dict[str, int]] = None
+        if self.track_tokens:
+            usage = {
+                "input_tokens": len(final_output.prompt_token_ids),
+                "thinking_tokens": 0,
+                "output_tokens": len(final_output.outputs[0].token_ids),
+            }
+
+        return text, usage
     
-    async def _generate_two_step(self, prompt: str, answer_params: SamplingParams) -> str:
+    async def _generate_two_step(
+        self, prompt: str, answer_params: SamplingParams
+    ) -> Tuple[str, Optional[Dict[str, int]]]:
         """Run two-phase (think → answer) generation for a single prompt.
 
         Phase 1 lets the model reason freely at moderate temperature until it
@@ -146,8 +173,18 @@ class AsyncABSASystem(BaseABSASystem):
                 :attr:`evaluator_answer_params` as appropriate.
 
         Returns:
-            Concatenation of the raw thought text and the answer text,
-            i.e. ``<thought_block></think>\n<answer_block>``.
+            A 2-tuple ``(combined_text, usage)`` where *combined_text* is the
+            concatenation of the thought block and the answer
+            (``<thought_block></think>\n<answer_block>``), and *usage* is
+            either a dict
+            ``{"input_tokens": int, "thinking_tokens": int, "output_tokens": int}``
+            when :attr:`track_tokens` is ``True``, or ``None`` otherwise.
+
+            *input_tokens* counts the tokens in the original prompt (phase 1
+            input).  *thinking_tokens* counts the tokens generated by phase 1.
+            *output_tokens* counts the tokens generated by phase 2.  The
+            phase-2 prompt (original prompt + thought) reuses the cached KV
+            entries so it is not double-counted.
         """
         # ------------------------------------------------------------------
         # PHASE 1: THINKING
@@ -179,8 +216,19 @@ class AsyncABSASystem(BaseABSASystem):
             final_answer_output = output
         generated_answer = final_answer_output.outputs[0].text
 
+        usage: Optional[Dict[str, int]] = None
+        if self.track_tokens:
+            usage = {
+                # Prompt tokens for the initial phase-1 request.
+                "input_tokens": len(thought_output.prompt_token_ids),
+                # Tokens the model generated while thinking.
+                "thinking_tokens": len(thought_output.outputs[0].token_ids),
+                # Tokens generated for the final answer (phase 2).
+                "output_tokens": len(final_answer_output.outputs[0].token_ids),
+            }
+
         # Return the combined text so callers can parse both reasoning and answer.
-        return generated_thought + generated_answer
+        return generated_thought + generated_answer, usage
 
     def _format_critique_history(self, critique_history: List[Dict]) -> str:
         """Render accumulated (extraction, critique) pairs into a prompt block.
@@ -227,7 +275,7 @@ class AsyncABSASystem(BaseABSASystem):
         self,
         input_text: str,
         critique_history: List[Dict] = None,
-    ) -> List[Dict]:
+    ) -> Tuple[List[Dict], Optional[Dict[str, int]]]:
         """Extract ABSA tuples from a review using the extractor LLM.
 
         Builds the extractor prompt, optionally prepending a structured block
@@ -246,10 +294,16 @@ class AsyncABSASystem(BaseABSASystem):
                 Pass ``None`` or an empty list on the first attempt.
 
         Returns:
-            A list of dicts, each representing one ABSA tuple
+            A 2-tuple ``(extraction, usage)``.
+
+            *extraction* is a list of dicts, each representing one ABSA tuple
             (e.g. ``{"aspect": ..., "opinion": ..., "sentiment": ...}``).
             If the model output cannot be parsed as a JSON list, returns a
             single-element list containing an error dict with the raw output.
+
+            *usage* is a token-count dict
+            ``{"input_tokens": int, "thinking_tokens": int, "output_tokens": int}``
+            when :attr:`track_tokens` is ``True``, otherwise ``None``.
         """
         # Build the structured feedback block from the full history.
         # On the first attempt this is an empty string.
@@ -267,16 +321,18 @@ class AsyncABSASystem(BaseABSASystem):
         # if critique_text:
         #     logger.debug(f"Extractor prompt with critique history:\n{full_prompt}")
 
-        raw_output = await self._generate_two_step(full_prompt, self.extractor_answer_params)
+        raw_output, usage = await self._generate_two_step(full_prompt, self.extractor_answer_params)
         parsed_reasoning = self._parse_reasoning_output(raw_output)
         result = self._parse_json(parsed_reasoning["content"])
 
         if not isinstance(result, list):
             # Propagate the raw model output so callers can log or retry.
-            return [{"error": "Invalid JSON format", "raw_output": parsed_reasoning["content"]}]
-        return result
+            return [{"error": "Invalid JSON format", "raw_output": parsed_reasoning["content"]}], usage
+        return result, usage
 
-    async def run_evaluator(self, input_text: str, extraction: List[Dict]) -> Dict:
+    async def run_evaluator(
+        self, input_text: str, extraction: List[Dict]
+    ) -> Tuple[Dict, Optional[Dict[str, int]]]:
         """Evaluate whether an extraction is correct using the evaluator LLM.
 
         Sends the original review together with the proposed ABSA tuples to
@@ -288,7 +344,9 @@ class AsyncABSASystem(BaseABSASystem):
                 :meth:`run_extractor` for this review.
 
         Returns:
-            A dict with at minimum:
+            A 2-tuple ``(evaluation, usage)``.
+
+            *evaluation* is a dict with at minimum:
 
             - ``is_correct`` (``bool``): whether the extraction is accepted.
             - ``reasoning`` (``str``): the evaluator's justification.
@@ -297,6 +355,10 @@ class AsyncABSASystem(BaseABSASystem):
 
             If the model output cannot be parsed, returns a fallback dict
             with ``is_correct=False`` and a ``"raw_output"`` key.
+
+            *usage* is a token-count dict
+            ``{"input_tokens": int, "thinking_tokens": int, "output_tokens": int}``
+            when :attr:`track_tokens` is ``True``, otherwise ``None``.
         """
         user_prompt_filled = self.prompts["evaluator_user"].format(
             input_text=input_text,
@@ -305,14 +367,14 @@ class AsyncABSASystem(BaseABSASystem):
 
         full_prompt = self._format_prompt(self.prompts["evaluator_system"], user_prompt_filled)
 
-        raw_output = await self._generate_two_step(full_prompt, self.evaluator_answer_params)
+        raw_output, usage = await self._generate_two_step(full_prompt, self.evaluator_answer_params)
         parsed_reasoning = self._parse_reasoning_output(raw_output)
         result = self._parse_json(parsed_reasoning["content"])
 
         if not isinstance(result, dict) or "is_correct" not in result:
             # Return a safe fallback so the caller's loop can continue.
-            return {"is_correct": False, "reasoning": "Parser failed", "critique": "", "raw_output": parsed_reasoning["content"]}
-        return result
+            return {"is_correct": False, "reasoning": "Parser failed", "critique": "", "raw_output": parsed_reasoning["content"]}, usage
+        return result, usage
 
     async def process_review(self, item_id: str, input_text: str, max_retries: int = 3) -> Dict:
         """Run the full extract → evaluate → retry agent loop for one review.
@@ -343,35 +405,72 @@ class AsyncABSASystem(BaseABSASystem):
             - ``attempts`` (``int``): Number of extraction attempts made.
             - ``history`` (``List[Dict]``): Per-attempt record of each
               extraction and its evaluation, useful for debugging.
+            - ``token_usage`` (``Dict[str, int] | None``): Aggregate token
+              counts across all attempts —
+              ``{"input_tokens": int, "thinking_tokens": int, "output_tokens": int}``
+              — when :attr:`track_tokens` is ``True``, otherwise ``None``.
         """
         # Accumulates {"extraction": ..., "critique": ...} for every rejected
         # attempt so the extractor always has the full correction history.
         critique_history: List[Dict] = []
         history: List[Dict] = []
 
+        # Running totals across all extractor + evaluator calls for this review.
+        total_usage: Optional[Dict[str, int]] = (
+            {"input_tokens": 0, "thinking_tokens": 0, "output_tokens": 0}
+            if self.track_tokens else None
+        )
+
+        def _accumulate(usage: Optional[Dict[str, int]]) -> None:
+            """Add per-call token counts to the review-level running totals."""
+            if total_usage is not None and usage is not None:
+                total_usage["input_tokens"] += usage["input_tokens"]
+                total_usage["thinking_tokens"] += usage["thinking_tokens"]
+                total_usage["output_tokens"] += usage["output_tokens"]
+
         logger.info(f"[ID: {item_id}] Processing: length={len(input_text)} chars")
 
         for attempt in range(max_retries):
             # On the first attempt critique_history is empty; on subsequent
             # attempts it contains every prior (extraction, critique) pair.
-            extraction = await self.run_extractor(input_text, critique_history)
-            evaluation = await self.run_evaluator(input_text, extraction)
+            extraction, ext_usage = await self.run_extractor(input_text, critique_history)
+            evaluation, eval_usage = await self.run_evaluator(input_text, extraction)
+
+            _accumulate(ext_usage)
+            _accumulate(eval_usage)
+
+            # Build per-attempt token breakdown for the history entry.
+            attempt_usage: Optional[Dict[str, int]] = None
+            if self.track_tokens:
+                attempt_usage = {
+                    k: (ext_usage or {}).get(k, 0) + (eval_usage or {}).get(k, 0)
+                    for k in ("input_tokens", "thinking_tokens", "output_tokens")
+                }
 
             # Record every attempt for post-hoc analysis.
-            history.append({
+            history_entry: Dict[str, Any] = {
                 "attempt": attempt + 1,
                 "extraction": extraction,
-                "evaluation": evaluation
-            })
+                "evaluation": evaluation,
+            }
+            if self.track_tokens:
+                history_entry["token_usage"] = attempt_usage
+            history.append(history_entry)
 
             if evaluation.get("is_correct") is True:
                 logger.info(f"[ID: {item_id}] Attempt {attempt+1} successful")
-                return {
+                result = {
                     "final_output": extraction,
                     "status": "success",
                     "attempts": attempt + 1,
-                    "history": history
+                    "history": history,
                 }
+                if self.track_tokens:
+                    result["token_usage"] = total_usage
+                    logger.debug(
+                        f"[ID: {item_id}] Token usage: {total_usage}"
+                    )
+                return result
 
             # Append this attempt's output and critique to the shared history
             # so all future extraction prompts include the full feedback trail.
@@ -383,12 +482,16 @@ class AsyncABSASystem(BaseABSASystem):
             logger.warning(f"[ID: {item_id}] Attempt {attempt+1} rejected. Critique: {current_critique}")
 
         logger.error(f"[ID: {item_id}] Max retries reached")
-        return {
+        result = {
             "final_output": extraction,  # Best attempt so far
             "status": "failed",
             "attempts": max_retries,
-            "history": history
+            "history": history,
         }
+        if self.track_tokens:
+            result["token_usage"] = total_usage
+            logger.debug(f"[ID: {item_id}] Token usage: {total_usage}")
+        return result
 
 if __name__ == "__main__":
     pass

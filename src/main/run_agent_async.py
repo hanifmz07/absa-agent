@@ -39,13 +39,15 @@ async def process_single_case(
         'status': output['status'],
         'attempts': output['attempts'],
         'final_extraction': output['final_output'],
-        'history': output['history']
+        'history': output['history'],
+        'token_usage': output.get('token_usage'),
     }
 
 async def main(args: argparse.Namespace):
-    model_path = "Qwen/Qwen3-8B"
+    model_path = args.model_path
+    model_name = model_path.split('/')[-1]
     logger.info(f"Initializing Async ABSA System with {model_path}...")
-    system = AsyncABSASystem(model_path, prompts_dir=f"prompts/{args.prompt_set}/", seed=args.seed)
+    system = AsyncABSASystem(model_path, prompts_dir=f"prompts/{args.prompt_set}/", seed=args.seed, track_tokens=args.track_tokens)
 
     # Load data
     logger.info(f"Loading test cases from: {args.test_case_path}")
@@ -82,7 +84,14 @@ async def main(args: argparse.Namespace):
 
     # Save to dir
     timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+    dataset_type = args.test_case_path.split('/')[1]  # e.g., 'hotel_reviews'
+    lang = args.test_case_path.split('/')[2]  # e.g., 'indo'
+    dataset_folder = args.test_case_path.split('/')[3]  # e.g., 'mvp_aos'
     output_dir = f"results/async"
+    output_dir = os.path.join(output_dir, model_name)
+    output_dir = os.path.join(output_dir, dataset_type)
+    output_dir = os.path.join(output_dir, lang)
+    output_dir = os.path.join(output_dir, dataset_folder)
     output_dir = os.path.join(output_dir, args.prompt_set)
     output_dir = os.path.join(output_dir, f"max_retries_{args.max_retries}")
     output_dir = os.path.join(output_dir, f"seed_{args.seed}")
@@ -102,9 +111,15 @@ if __name__ == "__main__":
         description="Run the async ABSA agent on a test dataset."
     )
     parser.add_argument(
+        "--model_path",
+        type=str,
+        default="Qwen/Qwen3-0.6B",
+        help="Path/url to the pre-trained model (default: %(default)s).",
+    )
+    parser.add_argument(
         "--test_case_path",
         type=str,
-        default="dataset/hoasa_hotel/indo/mvp_aos/test.json",
+        default="dataset/hotel_reviews/indo/mvp_aos/test.json",
         help="Path to the JSON test-case file (default: %(default)s).",
     )
     parser.add_argument(
@@ -124,6 +139,13 @@ if __name__ == "__main__":
         type=str,
         default="exp1",
         help="Prompt set to use for the agent (default: %(default)s).",
+    )
+    parser.add_argument(
+        "--track_tokens",
+        action="store_true",
+        default=False,
+        help="Enable per-instance token counting (input, thinking, output). "
+             "Counts are saved under 'token_usage' in the results file.",
     )
     parsed_args = parser.parse_args()
 
