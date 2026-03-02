@@ -2,13 +2,16 @@
 # python -m src.main.eval_agent --results_path results/absa_results.json
 
 # custom path + retries
+source .venv/bin/activate
 for max_retries in 1 3 5 10; do
     for seed in 42 123 777 2024 31415; do
         python -m src.main.eval_agent \
+            --model_path Qwen/Qwen3-8B \
+            --test_case_path dataset/hotel_reviews/indo/mvp_aos/test.json \
             --max_retries $max_retries \
-            --prompt_set exp1 \
             --seed $seed \
-            --runner_type async_0.6B
+            --prompt_set exp1 \
+            --runner_type "async"
     done
 done
 

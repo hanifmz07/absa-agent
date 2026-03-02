@@ -194,8 +194,18 @@ def evaluate(results: List[Dict], lowercase: bool) -> Dict:
 # ---------------------------------------------------------------------------
 def main(args: argparse.Namespace) -> None:
 
+    model_name = args.model_path.split('/')[-1]
+    dataset_type = args.test_case_path.split('/')[1]  # e.g., 'hotel_reviews'
+    lang = args.test_case_path.split('/')[2]  # e.g., 'indo'
+    dataset_folder = args.test_case_path.split('/')[3]  # e.g., 'mvp_aos'
+    logger.info(f"Evaluating results for model '{model_name}' on dataset '{dataset_type}/{lang}/{dataset_folder}'")
+
     results_path = f"results"
     results_path = os.path.join(results_path, args.runner_type)
+    results_path = os.path.join(results_path, model_name)
+    results_path = os.path.join(results_path, dataset_type)
+    results_path = os.path.join(results_path, lang)
+    results_path = os.path.join(results_path, dataset_folder)
     results_path = os.path.join(results_path, args.prompt_set)
     results_path = os.path.join(results_path, f"max_retries_{args.max_retries}")
     results_path = os.path.join(results_path, f"seed_{args.seed}")
@@ -272,6 +282,18 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         description="Evaluate ABSA agent results (target_text vs final_extraction)."
+    )
+    parser.add_argument(
+        "--model_path",
+        type=str,
+        default="Qwen/Qwen3-0.6B",
+        help="Path/url to the pre-trained model (default: %(default)s).",
+    )
+    parser.add_argument(
+        "--test_case_path",
+        type=str,
+        default="dataset/hotel_reviews/indo/mvp_aos/test.json",
+        help="Path to the JSON test-case file (default: %(default)s).",
     )
     parser.add_argument(
         "--max_retries",
