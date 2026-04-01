@@ -9,7 +9,7 @@ elif [ -f ".venv/Scripts/activate" ]; then
 fi
 
 # Default run configuration (can be overridden via environment variables).
-MODEL_NAME="${MODEL_NAME:-gemini-3.1-pro-preview}"
+MODEL_NAME="${MODEL_NAME:-gemini-3-flash-preview}"
 TEST_CASE_PATH="${TEST_CASE_PATH:-dataset/hotel_reviews/indo/mvp_aos/test.json}"
 PROMPT_SET="${PROMPT_SET:-exp1}"
 MAX_RETRIES="${MAX_RETRIES:-3}"
@@ -40,7 +40,7 @@ fi
 # for max_retries in 1 3 5 10; do
 #     for seed in 42 123 777 2024 31415; do
 #         python -m src.main.run_agent_async_gemini \
-#             --model_name gemini-3.1-pro-preview \
+#             --model_name gemini-3-flash-preview \
 #             --test_case_path dataset/hotel_reviews/indo/mvp_aos/test.json \
 #             --max_retries "$max_retries" \
 #             --prompt_set exp1 \

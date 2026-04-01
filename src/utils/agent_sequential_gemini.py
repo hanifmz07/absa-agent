@@ -28,7 +28,7 @@ class SequentialGeminiABSASystem:
 
     def __init__(
         self,
-        model_name: str = "gemini-3.1-pro-preview",
+        model_name: str = "gemini-3-flash-preview",
         prompts_dir: str = "prompts",
         track_tokens: bool = False,
         api_key: Optional[str] = None,

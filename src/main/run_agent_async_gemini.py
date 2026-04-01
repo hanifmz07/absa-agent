@@ -121,7 +121,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_name",
         type=str,
-        default="gemini-3.1-pro-preview",
+        default="gemini-3-flash-preview",
         help="Gemini model id (default: %(default)s).",
     )
     parser.add_argument(

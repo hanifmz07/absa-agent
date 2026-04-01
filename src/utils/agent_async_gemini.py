@@ -24,7 +24,7 @@ class AsyncGeminiABSASystem:
     extraction -> evaluation -> optional retries with full critique history.
 
     Args:
-        model_name: Gemini model id, e.g. "gemini-3.1-pro-preview".
+        model_name: Gemini model id, e.g. "gemini-3-flash-preview".
         prompts_dir: Directory containing extractor/evaluator prompt templates.
         track_tokens: Whether to include token usage stats in outputs.
         api_key: Optional API key. If omitted, GEMINI_API_KEY is used.
@@ -39,7 +39,7 @@ class AsyncGeminiABSASystem:
 
     def __init__(
         self,
-        model_name: str = "gemini-3.1-pro-preview",
+        model_name: str = "gemini-3-flash-preview",
         prompts_dir: str = "prompts",
         track_tokens: bool = False,
         api_key: Optional[str] = None,

@@ -4,7 +4,7 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Tuple
 
 from dotenv import load_dotenv
 
@@ -12,6 +12,26 @@ from ..utils.agent_sequential_gemini import SequentialGeminiABSASystem
 from ..utils.parsing import parse_absa_string
 
 logger = logging.getLogger(__name__)
+
+
+def _extract_dataset_parts(test_case_path: str) -> Tuple[str, str, str]:
+    # Normalize separators so Linux can also parse Windows-style paths.
+    normalized = test_case_path.replace("\\", "/")
+    parts = [part for part in normalized.split("/") if part]
+
+    try:
+        dataset_index = parts.index("dataset")
+    except ValueError as exc:
+        raise ValueError(
+            "test_case_path must contain 'dataset/<dataset_type>/<lang>/<dataset_folder>/...'"
+        ) from exc
+
+    if len(parts) <= dataset_index + 3:
+        raise ValueError(
+            "test_case_path must follow dataset/<dataset_type>/<lang>/<dataset_folder>/..."
+        )
+
+    return parts[dataset_index + 1], parts[dataset_index + 2], parts[dataset_index + 3]
 
 
 def main(args: argparse.Namespace) -> None:
@@ -28,6 +48,12 @@ def main(args: argparse.Namespace) -> None:
     logger.info("Loading test cases from: %s", args.test_case_path)
     with open(args.test_case_path, "r", encoding="utf-8") as f:
         test_cases = json.load(f)
+    
+    # Optionally limit the number of test cases for quicker runs
+    start_idx = 800
+    end_idx = len(test_cases)
+    end_idx = 1000
+    test_cases = test_cases[start_idx:end_idx]
 
     if args.limit is not None:
         test_cases = test_cases[: args.limit]
@@ -75,17 +101,9 @@ def main(args: argparse.Namespace) -> None:
     logger.info("All cases finished in %.2fs total processing time", overall_elapsed)
 
     timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
-    path_parts = Path(args.test_case_path).parts
-    if len(path_parts) < 4:
-        raise ValueError(
-            "test_case_path must follow dataset/<dataset_type>/<lang>/<dataset_folder>/..."
-        )
+    dataset_type, lang, dataset_folder = _extract_dataset_parts(args.test_case_path)
 
-    dataset_type = path_parts[1]
-    lang = path_parts[2]
-    dataset_folder = path_parts[3]
-
-    output_dir = Path("results") / "sequential_gemini"
+    output_dir = Path("results") / "sequential_gemini" / f"limit_{start_idx}_{end_idx}"
     output_dir = output_dir / args.model_name
     output_dir = output_dir / dataset_type / lang / dataset_folder
     output_dir = output_dir / args.prompt_set
@@ -115,7 +133,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_name",
         type=str,
-        default="gemini-3.1-pro-preview",
+        default="gemini-3-flash-preview",
         help="Gemini model id (default: %(default)s).",
     )
     parser.add_argument(

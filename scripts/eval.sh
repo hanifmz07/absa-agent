@@ -3,15 +3,17 @@
 
 # custom path + retries
 source .venv/bin/activate
-for max_retries in 1 3 5 10; do
-    for seed in 42 123 777 2024 31415; do
+# for max_retries in 1 3 5 10; do
+for max_retries in 10; do
+    # for seed in 42 123 777 2024 31415; do
+    for seed in 42; do
         python -m src.main.eval_agent \
-            --model_path Qwen/Qwen3-8B \
+            --model_path google/gemini-3-flash-preview \
             --test_case_path dataset/hotel_reviews/indo/mvp_aos/test.json \
             --max_retries $max_retries \
             --seed $seed \
             --prompt_set exp1 \
-            --runner_type "async"
+            --runner_type "sequential_gemini"
     done
 done
 

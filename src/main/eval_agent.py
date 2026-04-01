@@ -317,7 +317,7 @@ if __name__ == "__main__":
         "--runner_type",
         type=str,
         default="async",
-        choices=["async", "sequential", "batch", 'async_0.6B'],
+        choices=["async", "sequential", "batch", 'async_0.6B', 'sequential_gemini'],
         help="Type of ABSA agent runner used to generate the results (default: %(default)s).",
     )
     parser.add_argument(
