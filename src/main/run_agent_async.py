@@ -12,6 +12,25 @@ from ..utils.parsing import parse_absa_string, convert_to_absa_format
 
 logger = logging.getLogger(__name__)
 
+
+def _extract_dataset_parts(test_case_path: str):
+    normalized = test_case_path.replace("\\", "/")
+    parts = [part for part in normalized.split("/") if part]
+
+    try:
+        dataset_index = parts.index("dataset")
+    except ValueError as exc:
+        raise ValueError(
+            "test_case_path must contain 'dataset/<dataset_type>/<lang>/<dataset_folder>/...'"
+        ) from exc
+
+    if len(parts) <= dataset_index + 3:
+        raise ValueError(
+            "test_case_path must follow dataset/<dataset_type>/<lang>/<dataset_folder>/..."
+        )
+
+    return parts[dataset_index + 1], parts[dataset_index + 2], parts[dataset_index + 3]
+
 async def process_single_case(
     system: AsyncABSASystem,
     case: Dict,
@@ -46,8 +65,10 @@ async def process_single_case(
 async def main(args: argparse.Namespace):
     model_path = args.model_path
     model_name = model_path.split('/')[-1]
+    dataset_type, lang, dataset_folder = _extract_dataset_parts(args.test_case_path)
     logger.info(f"Initializing Async ABSA System with {model_path}...")
     system = AsyncABSASystem(model_path, prompts_dir=f"prompts/{args.prompt_set}/", seed=args.seed, track_tokens=args.track_tokens)
+    system.set_language_from_code(lang)
 
     # Load data
     logger.info(f"Loading test cases from: {args.test_case_path}")
@@ -84,9 +105,6 @@ async def main(args: argparse.Namespace):
 
     # Save to dir
     timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
-    dataset_type = args.test_case_path.split('/')[1]  # e.g., 'hotel_reviews'
-    lang = args.test_case_path.split('/')[2]  # e.g., 'indo'
-    dataset_folder = args.test_case_path.split('/')[3]  # e.g., 'mvp_aos'
     output_dir = f"results/async"
     output_dir = os.path.join(output_dir, model_name)
     output_dir = os.path.join(output_dir, dataset_type)

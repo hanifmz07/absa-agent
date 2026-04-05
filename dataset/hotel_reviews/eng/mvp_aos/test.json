@@ -1435,7 +1435,7 @@
         "sentence_id": 3679,
         "instance_id": 179,
         "input": "1. only 1 of the 6 available power outlets worked ,  2 were used for the tv and fridge . the electricity was really limited , and when i tried using an electric stove , the power even went out . [A] [O] [S]",
-        "target": "[A] only 1 of the 6 available power outlets worked ,  2 were used for the tv and fridge [S] negative [SSEP] [A] electricity [O] really limited [S] negative [SSEP] [A] power [O] when i tried using an electric stove , the power even went out [S] negative",
+        "target": "[A] power outlets [O] only 1 of the 6 available power outlets worked ,  2 were used for the tv and fridge [S] negative [SSEP] [A] electricity [O] really limited [S] negative [SSEP] [A] power [O] when i tried using an electric stove , the power even went out [S] negative",
         "element_order": "aos",
         "task_elements": "aos"
     },

@@ -175,7 +175,8 @@ class SequentialABSASystem(BaseABSASystem):
 			critique_instruction=critique_text,
 		)
 
-		full_prompt = self._format_prompt(self.prompts["extractor_system"], user_prompt_filled)
+		extractor_system = self._render_prompt_language(self.prompts["extractor_system"])
+		full_prompt = self._format_prompt(extractor_system, user_prompt_filled)
 
 		if critique_text:
 			logger.debug(f"Extractor prompt with critique history:\n{full_prompt}")
@@ -215,7 +216,8 @@ class SequentialABSASystem(BaseABSASystem):
 			extracted_json=json.dumps(extraction, indent=2),
 		)
 
-		full_prompt = self._format_prompt(self.prompts["evaluator_system"], user_prompt_filled)
+		evaluator_system = self._render_prompt_language(self.prompts["evaluator_system"])
+		full_prompt = self._format_prompt(evaluator_system, user_prompt_filled)
 
 		raw_output = self._generate_two_step(full_prompt, self.evaluator_answer_params)
 		parsed_reasoning = self._parse_reasoning_output(raw_output)

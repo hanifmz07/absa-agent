@@ -14,6 +14,25 @@ from ..utils.parsing import parse_absa_string
 logger = logging.getLogger(__name__)
 
 
+def _extract_dataset_parts(test_case_path: str):
+    normalized = test_case_path.replace("\\", "/")
+    parts = [part for part in normalized.split("/") if part]
+
+    try:
+        dataset_index = parts.index("dataset")
+    except ValueError as exc:
+        raise ValueError(
+            "test_case_path must contain 'dataset/<dataset_type>/<lang>/<dataset_folder>/...'"
+        ) from exc
+
+    if len(parts) <= dataset_index + 3:
+        raise ValueError(
+            "test_case_path must follow dataset/<dataset_type>/<lang>/<dataset_folder>/..."
+        )
+
+    return parts[dataset_index + 1], parts[dataset_index + 2], parts[dataset_index + 3]
+
+
 async def process_single_case(
     system: AsyncGeminiABSASystem,
     case: Dict,
@@ -44,6 +63,7 @@ async def process_single_case(
 
 
 async def main(args: argparse.Namespace) -> None:
+    dataset_type, lang, dataset_folder = _extract_dataset_parts(args.test_case_path)
     logger.info("Initializing Async Gemini ABSA System with %s...", args.model_name)
     system = AsyncGeminiABSASystem(
         model_name=args.model_name,
@@ -53,6 +73,7 @@ async def main(args: argparse.Namespace) -> None:
         max_api_retries=args.max_api_retries,
         retry_base_sleep_seconds=args.retry_base_sleep_seconds,
     )
+    system.set_language_from_code(lang)
 
     logger.info("Loading test cases from: %s", args.test_case_path)
     with open(args.test_case_path, "r", encoding="utf-8") as f:
@@ -81,16 +102,6 @@ async def main(args: argparse.Namespace) -> None:
     logger.info("All cases finished in %.2fs total processing time", overall_elapsed)
 
     timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
-    path_parts = Path(args.test_case_path).parts
-    if len(path_parts) < 4:
-        raise ValueError(
-            "test_case_path must follow dataset/<dataset_type>/<lang>/<dataset_folder>/..."
-        )
-
-    dataset_type = path_parts[1]
-    lang = path_parts[2]
-    dataset_folder = path_parts[3]
-
     output_dir = Path("results") / "async_gemini"
     output_dir = output_dir / args.model_name
     output_dir = output_dir / dataset_type / lang / dataset_folder

@@ -74,7 +74,7 @@ class AsyncABSASystem(BaseABSASystem):
             trust_remote_code=True,
             # max_model_len=max_model_len,
             dtype="auto",
-            gpu_memory_utilization=0.9,
+            gpu_memory_utilization=0.55,
             tensor_parallel_size=1,
             seed=seed,
             # Prefix caching is required for the two-step (think → answer)
@@ -315,7 +315,8 @@ class AsyncABSASystem(BaseABSASystem):
         )
 
 
-        full_prompt = self._format_prompt(self.prompts["extractor_system"], user_prompt_filled)
+        extractor_system = self._render_prompt_language(self.prompts["extractor_system"])
+        full_prompt = self._format_prompt(extractor_system, user_prompt_filled)
 
         # # Log the full prompt at debug level for troubleshooting; just log the prompt if the prompt contains critiques, since the full prompt can get very long.
         # if critique_text:
@@ -365,7 +366,8 @@ class AsyncABSASystem(BaseABSASystem):
             extracted_json=json.dumps(extraction, indent=2)
         )
 
-        full_prompt = self._format_prompt(self.prompts["evaluator_system"], user_prompt_filled)
+        evaluator_system = self._render_prompt_language(self.prompts["evaluator_system"])
+        full_prompt = self._format_prompt(evaluator_system, user_prompt_filled)
 
         raw_output, usage = await self._generate_two_step(full_prompt, self.evaluator_answer_params)
         parsed_reasoning = self._parse_reasoning_output(raw_output)

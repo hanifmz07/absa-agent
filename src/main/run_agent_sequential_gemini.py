@@ -36,6 +36,7 @@ def _extract_dataset_parts(test_case_path: str) -> Tuple[str, str, str]:
 
 def main(args: argparse.Namespace) -> None:
     logger.info("Initializing Sequential Gemini ABSA System with %s...", args.model_name)
+    _, lang, _ = _extract_dataset_parts(args.test_case_path)
     system = SequentialGeminiABSASystem(
         model_name=args.model_name,
         prompts_dir=f"prompts/{args.prompt_set}/",
@@ -44,6 +45,7 @@ def main(args: argparse.Namespace) -> None:
         max_api_retries=args.max_api_retries,
         retry_base_sleep_seconds=args.retry_base_sleep_seconds,
     )
+    system.set_language_from_code(lang)
 
     logger.info("Loading test cases from: %s", args.test_case_path)
     with open(args.test_case_path, "r", encoding="utf-8") as f:

@@ -3,15 +3,20 @@
 
 # custom path + retries
 source .venv/bin/activate
-for max_retries in 1 3 5 10; do
-    for seed in 42 123 777 2024 31415; do
+
+# Add language as a parameter (arguments) when running the script, e.g., ./inference.sh indo
+language=${1:-indo}
+
+# for max_retries in 1 3 5 10; do
+for max_retries in 10; do
+    for seed in 123 777 2024 9584 31415; do
         python -m src.main.run_agent_async \
             --model_path Qwen/Qwen3-8B \
-            --test_case_path dataset/hotel_reviews/indo/mvp_aos/test.json \
+            --test_case_path dataset/hotel_reviews/$language/mvp_aos/test.json \
             --max_retries $max_retries \
             --prompt_set exp1 \
-            --seed $seed \
-            --track_tokens
+            --seed $seed
+            # --track_tokens
     done
 done
 

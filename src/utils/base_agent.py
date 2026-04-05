@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from typing import List, Dict, Any
 
 from transformers import AutoTokenizer
+from .const import LANGCODE2LANGNAME
 
 logger = logging.getLogger(__name__)
 
@@ -37,9 +38,22 @@ class BaseABSASystem(ABC):
     def __init__(self, model_name: str, prompts_dir: str = "prompts"):
         logger.info(f"Loading prompts from directory: {prompts_dir}/")
         self.prompts = self._load_prompts_from_dir(prompts_dir)
+        self.language = "Indonesian"
 
         logger.info(f"Loading tokenizer: {model_name}")
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+
+    def set_language(self, language: str) -> None:
+        """Set the natural-language name used to render prompt placeholders."""
+        self.language = language
+
+    def set_language_from_code(self, language_code: str) -> None:
+        """Resolve a dataset language code (e.g., 'indo') to display name."""
+        self.language = LANGCODE2LANGNAME.get(language_code, language_code)
+
+    def _render_prompt_language(self, prompt: str) -> str:
+        """Replace the {language} placeholder without touching JSON braces."""
+        return prompt.replace("{language}", self.language)
 
     def _load_prompts_from_dir(self, directory: str) -> Dict[str, str]:
         """Load all required `.md` prompt files from *directory* into a dict."""

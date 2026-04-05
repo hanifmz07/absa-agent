@@ -34,6 +34,7 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from openai import AsyncOpenAI
+from .const import LANGCODE2LANGNAME
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +91,7 @@ class OpenRouterABSASystem:
         max_tokens_evaluator: int = 2048,
     ) -> None:
         self.model_name = model_name
+        self.language = "Indonesian"
         self.extractor_temperature = extractor_temperature
         self.evaluator_temperature = evaluator_temperature
         self.max_tokens_extractor = max_tokens_extractor
@@ -144,6 +146,15 @@ class OpenRouterABSASystem:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
+
+    def set_language(self, language: str) -> None:
+        self.language = language
+
+    def set_language_from_code(self, language_code: str) -> None:
+        self.language = LANGCODE2LANGNAME.get(language_code, language_code)
+
+    def _render_prompt_language(self, prompt: str) -> str:
+        return prompt.replace("{language}", self.language)
 
     # ------------------------------------------------------------------
     # Output parsing helpers  (mirrors BaseABSASystem)
@@ -257,7 +268,8 @@ class OpenRouterABSASystem:
             input_text=input_text,
             critique_instruction=critique_text,
         )
-        messages = self._build_messages(self.prompts["extractor_system"], user_prompt)
+        extractor_system = self._render_prompt_language(self.prompts["extractor_system"])
+        messages = self._build_messages(extractor_system, user_prompt)
 
         raw_output = await self._generate(
             messages,
@@ -290,7 +302,8 @@ class OpenRouterABSASystem:
             input_text=input_text,
             extracted_json=json.dumps(extraction, indent=2, ensure_ascii=False),
         )
-        messages = self._build_messages(self.prompts["evaluator_system"], user_prompt)
+        evaluator_system = self._render_prompt_language(self.prompts["evaluator_system"])
+        messages = self._build_messages(evaluator_system, user_prompt)
 
         raw_output = await self._generate(
             messages,

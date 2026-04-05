@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from google import genai
 from google.genai import types
+from .const import LANGCODE2LANGNAME
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +49,7 @@ class AsyncGeminiABSASystem:
     ) -> None:
         self.model_name = model_name
         self.prompts = self._load_prompts_from_dir(prompts_dir)
+        self.language = "Indonesian"
         self.track_tokens = track_tokens
         self.max_api_retries = max(1, max_api_retries)
         self.retry_base_sleep_seconds = max(0.1, retry_base_sleep_seconds)
@@ -155,6 +157,15 @@ class AsyncGeminiABSASystem:
             "USER INPUT:\n"
             f"{user_prompt}"
         )
+
+    def set_language(self, language: str) -> None:
+        self.language = language
+
+    def set_language_from_code(self, language_code: str) -> None:
+        self.language = LANGCODE2LANGNAME.get(language_code, language_code)
+
+    def _render_prompt_language(self, prompt: str) -> str:
+        return prompt.replace("{language}", self.language)
 
     def _parse_json(self, text: str) -> Any:
         try:
@@ -395,11 +406,12 @@ class AsyncGeminiABSASystem:
             input_text=input_text,
             critique_instruction=critique_text,
         )
-        full_prompt = self._build_prompt(self.prompts["extractor_system"], user_prompt_filled)
+        extractor_system = self._render_prompt_language(self.prompts["extractor_system"])
+        full_prompt = self._build_prompt(extractor_system, user_prompt_filled)
 
         raw_output, usage = await self._generate_two_step(
             full_prompt,
-            self.prompts["extractor_system"],
+            extractor_system,
             self.extractor_answer_config,
         )
         parsed_reasoning = self._parse_reasoning_output(raw_output)
@@ -423,11 +435,12 @@ class AsyncGeminiABSASystem:
             input_text=input_text,
             extracted_json=json.dumps(extraction, indent=2),
         )
-        full_prompt = self._build_prompt(self.prompts["evaluator_system"], user_prompt_filled)
+        evaluator_system = self._render_prompt_language(self.prompts["evaluator_system"])
+        full_prompt = self._build_prompt(evaluator_system, user_prompt_filled)
 
         raw_output, usage = await self._generate_two_step(
             full_prompt,
-            self.prompts["evaluator_system"],
+            evaluator_system,
             self.evaluator_answer_config,
         )
         parsed_reasoning = self._parse_reasoning_output(raw_output)

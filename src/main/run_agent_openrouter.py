@@ -34,6 +34,25 @@ from ..utils.parsing import parse_absa_string
 logger = logging.getLogger(__name__)
 
 
+def _extract_dataset_parts(test_case_path: str):
+    normalized = test_case_path.replace("\\", "/")
+    parts = [part for part in normalized.split("/") if part]
+
+    try:
+        dataset_index = parts.index("dataset")
+    except ValueError as exc:
+        raise ValueError(
+            "test_case_path must contain 'dataset/<dataset_type>/<lang>/<dataset_folder>/...'"
+        ) from exc
+
+    if len(parts) <= dataset_index + 3:
+        raise ValueError(
+            "test_case_path must follow dataset/<dataset_type>/<lang>/<dataset_folder>/..."
+        )
+
+    return parts[dataset_index + 1], parts[dataset_index + 2], parts[dataset_index + 3]
+
+
 async def process_single_case(
     system: OpenRouterABSASystem,
     case: Dict,
@@ -74,6 +93,7 @@ async def process_single_case(
 
 
 async def main(args: argparse.Namespace) -> None:
+    _, lang, _ = _extract_dataset_parts(args.test_case_path)
     logger.info(
         f"Initialising OpenRouter ABSA System "
         f"(model={args.model}, prompt_set={args.prompt_set})"
@@ -85,6 +105,7 @@ async def main(args: argparse.Namespace) -> None:
         site_url=args.site_url or None,
         site_name=args.site_name or None,
     )
+    system.set_language_from_code(lang)
 
     # Load test cases
     logger.info(f"Loading test cases from: {args.test_case_path}")

@@ -11,10 +11,31 @@ from ..utils.parsing import parse_absa_string, convert_to_absa_format
 
 logger = logging.getLogger(__name__)
 
+
+def _extract_dataset_parts(test_case_path: str):
+    normalized = test_case_path.replace("\\", "/")
+    parts = [part for part in normalized.split("/") if part]
+
+    try:
+        dataset_index = parts.index("dataset")
+    except ValueError as exc:
+        raise ValueError(
+            "test_case_path must contain 'dataset/<dataset_type>/<lang>/<dataset_folder>/...'"
+        ) from exc
+
+    if len(parts) <= dataset_index + 3:
+        raise ValueError(
+            "test_case_path must follow dataset/<dataset_type>/<lang>/<dataset_folder>/..."
+        )
+
+    return parts[dataset_index + 1], parts[dataset_index + 2], parts[dataset_index + 3]
+
 def main(args: argparse.Namespace):
     model_path = "Qwen/Qwen3-0.6B" 
+    _, lang, _ = _extract_dataset_parts(args.test_case_path)
     logger.info(f"Initializing ABSA System with {model_path}...")
     system = SequentialABSASystem(model_path, prompts_dir=f"prompts/{args.prompt_set}/", seed=args.seed)
+    system.set_language_from_code(lang)
 
     # Load data
     logger.info(f"Loading test cases from: {args.test_case_path}")

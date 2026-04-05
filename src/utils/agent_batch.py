@@ -246,7 +246,8 @@ class BatchABSASystem(BaseABSASystem):
                     input_text=active_items[uid]["text"],
                     critique_instruction=critique_text,
                 )
-                ext_prompts.append(self._format_prompt(self.prompts["extractor_system"], user_prompt))
+                extractor_system = self._render_prompt_language(self.prompts["extractor_system"])
+                ext_prompts.append(self._format_prompt(extractor_system, user_prompt))
 
             logger.info("Running extractor inference (two-step)...")
             raw_ext_texts = self._batch_generate_two_step(ext_prompts, self.extractor_answer_params)
@@ -268,7 +269,8 @@ class BatchABSASystem(BaseABSASystem):
                     input_text=active_items[uid]["text"],
                     extracted_json=json.dumps(ext_json, indent=2),
                 )
-                eval_prompts.append(self._format_prompt(self.prompts["evaluator_system"], user_prompt))
+                evaluator_system = self._render_prompt_language(self.prompts["evaluator_system"])
+                eval_prompts.append(self._format_prompt(evaluator_system, user_prompt))
 
             logger.info("Running evaluator inference (two-step)...")
             raw_eval_texts = self._batch_generate_two_step(eval_prompts, self.evaluator_answer_params)
