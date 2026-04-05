@@ -46,6 +46,28 @@ logger = logging.getLogger(__name__)
 # Helpers
 # ---------------------------------------------------------------------------
 
+def _extract_dataset_parts(test_case_path: str):
+    """Extract dataset_type/lang/dataset_folder from dataset path.
+
+    Supports both Unix and Windows separators.
+    """
+    normalized = test_case_path.replace("\\", "/")
+    parts = [part for part in normalized.split("/") if part]
+
+    try:
+        dataset_index = parts.index("dataset")
+    except ValueError as exc:
+        raise ValueError(
+            "test_case_path must contain 'dataset/<dataset_type>/<lang>/<dataset_folder>/...'"
+        ) from exc
+
+    if len(parts) <= dataset_index + 3:
+        raise ValueError(
+            "test_case_path must follow dataset/<dataset_type>/<lang>/<dataset_folder>/..."
+        )
+
+    return parts[dataset_index + 1], parts[dataset_index + 2], parts[dataset_index + 3]
+
 def _is_valid_triplet(t: Dict) -> bool:
     """Return ``True`` for a well-formed ABSA triplet dict.
 
@@ -195,9 +217,7 @@ def evaluate(results: List[Dict], lowercase: bool) -> Dict:
 def main(args: argparse.Namespace) -> None:
 
     model_name = args.model_path.split('/')[-1]
-    dataset_type = args.test_case_path.split('/')[1]  # e.g., 'hotel_reviews'
-    lang = args.test_case_path.split('/')[2]  # e.g., 'indo'
-    dataset_folder = args.test_case_path.split('/')[3]  # e.g., 'mvp_aos'
+    dataset_type, lang, dataset_folder = _extract_dataset_parts(args.test_case_path)
     logger.info(f"Evaluating results for model '{model_name}' on dataset '{dataset_type}/{lang}/{dataset_folder}'")
 
     results_path = f"results"

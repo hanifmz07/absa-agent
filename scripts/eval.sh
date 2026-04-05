@@ -3,13 +3,17 @@
 
 # custom path + retries
 source .venv/bin/activate
+
+# Add language as a parameter (arguments) when running the script, e.g., ./eval.sh indo
+language=${1:-indo}
+
 # for max_retries in 1 3 5 10; do
 for max_retries in 10; do
-    # for seed in 42 123 777 2024 31415; do
-    for seed in 42; do
+    for seed in 42 123 777 2024 31415; do
+    # for seed in 42; do
         python -m src.main.eval_agent \
             --model_path google/gemini-3-flash-preview \
-            --test_case_path dataset/hotel_reviews/indo/mvp_aos/test.json \
+            --test_case_path dataset/hotel_reviews/$language/mvp_aos/test.json \
             --max_retries $max_retries \
             --seed $seed \
             --prompt_set exp1 \
