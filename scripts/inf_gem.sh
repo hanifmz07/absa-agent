@@ -11,6 +11,7 @@ fi
 # Default run configuration (can be overridden via environment variables).
 MODEL_NAME="${MODEL_NAME:-gemini-3-flash-preview}"
 TEST_CASE_PATH="${TEST_CASE_PATH:-dataset/hotel_reviews/indo/mvp_aos/test.json}"
+LANGUAGES=(indo eng jav mad min sun)
 PROMPT_SET="${PROMPT_SET:-exp1}"
 MAX_RETRIES="${MAX_RETRIES:-10}"
 SEED="${SEED:-42}"
@@ -28,24 +29,32 @@ else
     exit 1
 fi
 
-CMD=(
-    "$PYTHON_BIN" -m src.main.run_agent_sequential_gemini
-    --model_name "$MODEL_NAME"
-    --test_case_path "$TEST_CASE_PATH"
-    --prompt_set "$PROMPT_SET"
-    --max_retries "$MAX_RETRIES"
-    --seed "$SEED"
-    --max_api_retries "$MAX_API_RETRIES"
-    --retry_base_sleep_seconds "$RETRY_BASE_SLEEP_SECONDS"
-)
+for LANG in "${LANGUAGES[@]}"; do
+    # Replace '/indo/' with the current language to build per-language dataset path.
+    LANG_TEST_CASE_PATH="${TEST_CASE_PATH/\/indo\//\/$LANG\/}"
+    echo "Running for language: $LANG"
+    echo "Using test case path: $LANG_TEST_CASE_PATH"
 
-if [ "$TRACK_TOKENS" = "true" ]; then
-    CMD+=(--track_tokens)
-fi
+    CMD=(
+        "$PYTHON_BIN" -m src.main.run_agent_sequential_gemini
+        --model_name "$MODEL_NAME"
+        --test_case_path "$LANG_TEST_CASE_PATH"
+        --language_code "$LANG"
+        --prompt_set "$PROMPT_SET"
+        --max_retries "$MAX_RETRIES"
+        --seed "$SEED"
+        --max_api_retries "$MAX_API_RETRIES"
+        --retry_base_sleep_seconds "$RETRY_BASE_SLEEP_SECONDS"
+    )
 
-if [ -n "$LIMIT" ]; then
-    CMD+=(--limit "$LIMIT")
-fi
+    if [ "$TRACK_TOKENS" = "true" ]; then
+        CMD+=(--track_tokens)
+    fi
 
-# GEMINI_API_KEY is loaded from .env by the Python runner (dotenv).
-"${CMD[@]}"
+    if [ -n "$LIMIT" ]; then
+        CMD+=(--limit "$LIMIT")
+    fi
+
+    # GEMINI_API_KEY is loaded from .env by the Python runner (dotenv).
+    "${CMD[@]}"
+done

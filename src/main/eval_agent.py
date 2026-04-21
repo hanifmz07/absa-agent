@@ -34,11 +34,11 @@ import argparse
 import json
 import logging
 import os
-from typing import Dict, List
 from glob import glob
+from typing import Dict, List
 
-from ..utils.eval_utils import calculate_metrics, calculate_instance_metrics
-from ..utils.parsing import lower_triplets, punctuation_triplets
+from ..utils.eval_utils import calculate_metrics, normalize_triplet_list
+from ..utils.parsing import punctuation_triplets
 
 logger = logging.getLogger(__name__)
 
@@ -68,45 +68,19 @@ def _extract_dataset_parts(test_case_path: str):
 
     return parts[dataset_index + 1], parts[dataset_index + 2], parts[dataset_index + 3]
 
-def _is_valid_triplet(t: Dict) -> bool:
-    """Return ``True`` for a well-formed ABSA triplet dict.
-
-    Rejects dicts that contain an ``"error"`` key — these are the error
-    sentinels the agent inserts when JSON parsing fails.
-    """
-    return (
-        isinstance(t, dict)
-        and "error" not in t
-        and {"aspect", "opinion", "sentiment"}.issubset(t.keys())
-    )
+def _apply_lowercase(triplets: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    """Lowercase all triplet values while preserving A/O/S keys."""
+    return [{k: str(v).lower() for k, v in triplet.items()} for triplet in triplets]
 
 
-def _normalise(triplets: List[Dict], lowercase: bool) -> List[Dict]:
-    """Apply punctuation-spacing and optional lowercasing normalisation.
-
-    Matches the normalisation pipeline used during SFT evaluation in
-    ``eval.py``.
-
-    Args:
-        triplets: List of ``{"aspect", "opinion", "sentiment"}`` dicts.
-        lowercase: When ``True`` all string values are lowercased.
-
-    Returns:
-        Normalised copy of *triplets*.
-    """
-    # Convert null values to "null"
-    for t in triplets:
-        for k, v in t.items():
-            if v is None:
-                t[k] = "null"
-
-    # Add space for punctuations
-    result = punctuation_triplets(triplets)
-
-    # Lowercase if needed
-    if lowercase:
-        result = lower_triplets(result)
-    return result
+def _instance_metrics(pred: List[Dict[str, str]], tgt: List[Dict[str, str]]) -> Dict[str, float]:
+    """Compute per-instance precision/recall/f1 using the same matcher as global metrics."""
+    scores = calculate_metrics([pred], [tgt], task="instance")
+    return {
+        "precision": scores["precision_instance"],
+        "recall": scores["recall_instance"],
+        "f1": scores["f1_instance"],
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -149,24 +123,22 @@ def evaluate(results: List[Dict], lowercase: bool) -> Dict:
             n_skipped += 1
             continue
 
-        # Drop error-sentinel dicts produced by the agent on parse failures.
-        pred = [t for t in raw_pred if _is_valid_triplet(t)]
-        tgt  = [t for t in raw_tgt  if _is_valid_triplet(t)]
+        # Follow eval_exact_match.py behavior by normalizing keys only.
+        pred = normalize_triplet_list(raw_pred)
+        tgt = normalize_triplet_list(raw_tgt)
 
-        if len(pred) != len(raw_pred):
-            logger.debug(
-                f"[ID {entry.get('id')}] Dropped "
-                f"{len(raw_pred) - len(pred)} malformed prediction triplet(s)."
-            )
+        pred = punctuation_triplets(pred)
+        tgt = punctuation_triplets(tgt)
 
-        pred = _normalise(pred, lowercase)
-        tgt  = _normalise(tgt,  lowercase)
+        if lowercase:
+            pred = _apply_lowercase(pred)
+            tgt = _apply_lowercase(tgt)
 
         predictions.append(pred)
         targets.append(tgt)
 
         # Per-instance metrics.
-        inst_m = calculate_instance_metrics(pred, tgt)
+        inst_m = _instance_metrics(pred, tgt)
         instance_metrics.append({
             "id":        entry.get("id"),
             "status":    entry.get("status", "unknown"),

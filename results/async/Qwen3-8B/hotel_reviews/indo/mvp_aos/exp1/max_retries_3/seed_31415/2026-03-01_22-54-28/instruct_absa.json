@@ -1,0 +1,15 @@
+{
+  "path": "results/async/Qwen3-8B/hotel_reviews/indo/mvp_aos/exp1/max_retries_3/seed_31415/2026-03-01_22-54-28/inference_results.json",
+  "runner_type": "async",
+  "model_name": "Qwen3-8B",
+  "dataset_type": "hotel_reviews",
+  "lang": "indo",
+  "dataset_folder": "mvp_aos",
+  "prompt_dir": "exp1",
+  "max_retries": "max_retries_3",
+  "seed": "seed_31415",
+  "run_id": "2026-03-01_22-54-28",
+  "precision": 50.9,
+  "recall": 49.90196078431373,
+  "f1": 50.396039603960396
+}

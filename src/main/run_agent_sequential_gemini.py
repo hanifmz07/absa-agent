@@ -4,7 +4,7 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 from dotenv import load_dotenv
 
@@ -34,9 +34,25 @@ def _extract_dataset_parts(test_case_path: str) -> Tuple[str, str, str]:
     return parts[dataset_index + 1], parts[dataset_index + 2], parts[dataset_index + 3]
 
 
+def _resolve_language_code(test_case_path: str, language_code: Optional[str]) -> str:
+    if language_code:
+        return language_code.strip().lower()
+
+    try:
+        _, extracted_lang, _ = _extract_dataset_parts(test_case_path)
+        return extracted_lang.strip().lower()
+    except ValueError:
+        logger.warning(
+            "Could not infer language from test_case_path='%s'. Falling back to 'indo'. "
+            "Pass --language_code to set it explicitly.",
+            test_case_path,
+        )
+        return "indo"
+
+
 def main(args: argparse.Namespace) -> None:
     logger.info("Initializing Sequential Gemini ABSA System with %s...", args.model_name)
-    _, lang, _ = _extract_dataset_parts(args.test_case_path)
+    lang = _resolve_language_code(args.test_case_path, args.language_code)
     system = SequentialGeminiABSASystem(
         model_name=args.model_name,
         prompts_dir=f"prompts/{args.prompt_set}/",
@@ -46,19 +62,19 @@ def main(args: argparse.Namespace) -> None:
         retry_base_sleep_seconds=args.retry_base_sleep_seconds,
     )
     system.set_language_from_code(lang)
+    logger.info("Using language code '%s' for prompts.", lang)
 
     logger.info("Loading test cases from: %s", args.test_case_path)
     with open(args.test_case_path, "r", encoding="utf-8") as f:
         test_cases = json.load(f)
     
-    # Optionally limit the number of test cases for quicker runs
-    start_idx = 800
+    # Process the full dataset by default.
+    start_idx = 0
     end_idx = len(test_cases)
-    end_idx = 1000
-    test_cases = test_cases[start_idx:end_idx]
 
     if args.limit is not None:
         test_cases = test_cases[: args.limit]
+        end_idx = min(end_idx, start_idx + len(test_cases))
 
     for case in test_cases:
         case["input"] = case["input"].replace("[A] [O] [S]", "").strip()
@@ -103,11 +119,17 @@ def main(args: argparse.Namespace) -> None:
     logger.info("All cases finished in %.2fs total processing time", overall_elapsed)
 
     timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
-    dataset_type, lang, dataset_folder = _extract_dataset_parts(args.test_case_path)
+    try:
+        dataset_type, path_lang, dataset_folder = _extract_dataset_parts(args.test_case_path)
+    except ValueError:
+        dataset_type = "custom"
+        path_lang = lang
+        dataset_folder = Path(args.test_case_path).stem
 
-    output_dir = Path("results") / "sequential_gemini" / f"limit_{start_idx}_{end_idx}"
+    # output_dir = Path("results") / "sequential_gemini" / f"limit_{start_idx}_{end_idx}"
+    output_dir = Path("results") / "sequential_gemini"
     output_dir = output_dir / args.model_name
-    output_dir = output_dir / dataset_type / lang / dataset_folder
+    output_dir = output_dir / dataset_type / path_lang / dataset_folder
     output_dir = output_dir / args.prompt_set
     output_dir = output_dir / f"max_retries_{args.max_retries}"
     output_dir = output_dir / f"seed_{args.seed}"
@@ -149,6 +171,12 @@ if __name__ == "__main__":
         type=str,
         default="dataset/hotel_reviews/indo/mvp_aos/test.json",
         help="Path to the JSON test-case file (default: %(default)s).",
+    )
+    parser.add_argument(
+        "--language_code",
+        type=str,
+        default=None,
+        help="Optional language code override (e.g., eng, jav, mad, min, sun). If omitted, inferred from test_case_path.",
     )
     parser.add_argument(
         "--max_retries",

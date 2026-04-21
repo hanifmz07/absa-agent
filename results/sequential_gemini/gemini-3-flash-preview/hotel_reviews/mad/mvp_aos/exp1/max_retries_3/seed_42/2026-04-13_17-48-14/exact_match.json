@@ -1,0 +1,15 @@
+{
+  "path": "results/sequential_gemini/gemini-3-flash-preview/hotel_reviews/mad/mvp_aos/exp1/max_retries_3/seed_42/2026-04-13_17-48-14/inference_results.json",
+  "runner_type": "sequential_gemini",
+  "model_name": "gemini-3-flash-preview",
+  "dataset_type": "hotel_reviews",
+  "lang": "mad",
+  "dataset_folder": "mvp_aos",
+  "prompt_dir": "exp1",
+  "max_retries": "max_retries_3",
+  "seed": "seed_42",
+  "run_id": "2026-04-13_17-48-14",
+  "precision": 40.804953560371516,
+  "recall": 44.19852448021462,
+  "f1": 42.43399871216999
+}

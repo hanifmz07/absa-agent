@@ -153,6 +153,11 @@ python -m src.main.run_agent_openrouter \
 
 Evaluation consumes generated `inference_results.json` and writes `agent_evaluation_results.json` to the same timestamp folder.
 
+This repository now has two evaluation tracks:
+
+- Agent evaluator (`eval_agent.py`) for the legacy/agent report format.
+- Method-based evaluators (`exact_match`, `instruct_absa`, `semantic`) for cross-method comparison outputs.
+
 ### A. Script workflow (recommended)
 
 #### 1) Evaluate one language
@@ -187,6 +192,131 @@ python -m src.main.eval_agent \
 - `sequential_gemini`
 
 Use `--lowercase` if you want lowercased comparison before scoring.
+
+### C. Method-Based Evaluation (Exact Match, InstructABSA, Semantic)
+
+These evaluators read agent inference results from paths like:
+
+```text
+{output_dir}/async/{model_name}/{dataset_type}/{lang}/{dataset_folder}/{prompt_dir}/{num_of_max_retries}/{seed}/{timestamp_or_id}/inference_results.json
+```
+
+Example:
+
+```text
+results/async/Qwen3-8B/hotel_reviews/indo/mvp_aos/exp1/max_retries_10/seed_42/2026-03-02_01-21-36/inference_results.json
+```
+
+#### 1) Exact Match
+
+How it works:
+
+- Compares predicted and target triplets as structured tuples (`aspect`, `opinion`, `sentiment`) after normalization.
+- A triplet counts as true positive only when all three fields match exactly.
+- False positives are predicted triplets not found in target; false negatives are target triplets not found in prediction.
+- Dataset-level precision/recall/F1 are computed from aggregated TP/FP/FN across all instances.
+
+Single config:
+
+```bash
+bash scripts/eval_exact_match.sh \
+	results \
+	Qwen3-8B \
+	hotel_reviews \
+	indo \
+	mvp_aos \
+	exp1 \
+	max_retries_10 \
+	seed_42 \
+	2026-03-02_01-21-36
+```
+
+All discovered async results:
+
+```bash
+bash scripts/eval_all_exact_match.sh results
+```
+
+Outputs (written beside each `inference_results.json`):
+
+- `exact_match.json` (dataset-level precision/recall/f1)
+- `exact_match_detail.json` (instance-level precision/recall/f1 + false positives/false negatives)
+
+#### 2) InstructABSA
+
+How it works:
+
+- Converts each triplet into AOSTE-style text (`aspect:opinion:sentiment`) and compares at string level.
+- Uses substring-friendly matching (`pred in gt` or `gt in pred`) to tolerate small wording differences.
+- This is less strict than exact match, so partially equivalent phrasing can still count as correct.
+- Precision/recall/F1 are computed from matched/unmatched triplet strings.
+
+Single config:
+
+```bash
+bash scripts/eval_instruct_absa.sh \
+	results \
+	Qwen3-8B \
+	hotel_reviews \
+	indo \
+	mvp_aos \
+	exp1 \
+	max_retries_10 \
+	seed_42 \
+	2026-03-02_01-21-36
+```
+
+All discovered async results:
+
+```bash
+bash scripts/eval_all_instruct_absa.sh results
+```
+
+Outputs:
+
+- `instruct_absa.json`
+- `instruct_absa_detail.json`
+
+#### 3) Semantic
+
+How it works:
+
+- Converts agent triplets to tagged ABSA strings (`[A] ... [O] ... [S] ...`) to align with `example_eval` format.
+- First performs exact string matching.
+- For remaining mismatches, computes embedding cosine similarity between unmatched prediction/target strings.
+- If similarity is above threshold (default `0.9`), it is treated as a semantic match; remaining items become FP/FN.
+
+Single config:
+
+```bash
+bash scripts/eval_semantic.sh \
+	results \
+	Qwen/Qwen3-Embedding-0.6B \
+	Qwen3-8B \
+	hotel_reviews \
+	indo \
+	mvp_aos \
+	exp1 \
+	max_retries_10 \
+	seed_42 \
+	2026-03-02_01-21-36
+```
+
+All discovered async results:
+
+```bash
+bash scripts/eval_all_semantic.sh results Qwen/Qwen3-Embedding-0.6B
+```
+
+Outputs:
+
+- `semantic_metrics.json`
+- `semantic_metrics_detail.json`
+
+Notes:
+
+- Semantic evaluation requires `sentence-transformers`.
+- Semantic evaluator converts agent triplets into `[A] ... [O] ... [S] ...` format before scoring, to match `example_eval` style.
 
 ## Result Paths
 
