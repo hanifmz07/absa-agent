@@ -59,7 +59,7 @@ class AsyncABSASystem(BaseABSASystem):
             skip all counting overhead.
     """
 
-    def __init__(self, model_name: str, prompts_dir: str = "prompts", max_model_len: int = 4096, seed: int = 42, track_tokens: bool = False):
+    def __init__(self, model_name: str, prompts_dir: str = "prompts", max_model_len: int = 24576, seed: int = 42, track_tokens: bool = False, gpu_memory_utilization: float = 0.55):
         super().__init__(model_name, prompts_dir)
 
         logger.info(f"Initializing Async vLLM Engine: {model_name}")
@@ -67,14 +67,13 @@ class AsyncABSASystem(BaseABSASystem):
         #: Enable / disable per-generation token counting.
         self.track_tokens: bool = track_tokens
 
-        # Build engine arguments; max_model_len is kept commented out so the
-        # engine auto-detects the context window from the model config.
+        # Build engine arguments.
         engine_args = AsyncEngineArgs(
             model=model_name,
             trust_remote_code=True,
-            # max_model_len=max_model_len,
+            max_model_len=max_model_len,
             dtype="auto",
-            gpu_memory_utilization=0.55,
+            gpu_memory_utilization=gpu_memory_utilization,
             tensor_parallel_size=1,
             seed=seed,
             # Prefix caching is required for the two-step (think → answer)

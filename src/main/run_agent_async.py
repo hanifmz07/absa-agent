@@ -67,7 +67,14 @@ async def main(args: argparse.Namespace):
     model_name = model_path.split('/')[-1]
     dataset_type, lang, dataset_folder = _extract_dataset_parts(args.test_case_path)
     logger.info(f"Initializing Async ABSA System with {model_path}...")
-    system = AsyncABSASystem(model_path, prompts_dir=f"prompts/{args.prompt_set}/", seed=args.seed, track_tokens=args.track_tokens)
+    system = AsyncABSASystem(
+        model_path,
+        prompts_dir=f"prompts/{args.prompt_set}/",
+        seed=args.seed,
+        track_tokens=args.track_tokens,
+        gpu_memory_utilization=args.gpu_memory_utilization,
+        max_model_len=args.max_model_len,
+    )
     system.set_language_from_code(lang)
 
     # Load data
@@ -151,6 +158,26 @@ if __name__ == "__main__":
         type=int,
         default=42,
         help="Random seed for the vLLM engine (default: %(default)s).",
+    )
+    parser.add_argument(
+        "--gpu_memory_utilization",
+        type=float,
+        default=0.55,
+        help="Fraction of GPU memory vLLM is allowed to use (default: %(default)s, "
+             "matching agent_async.py's prior hardcoded value). Raise this if you see "
+             "'No available memory for the cache blocks' on a smaller/otherwise-idle GPU.",
+    )
+    parser.add_argument(
+        "--max_model_len",
+        type=int,
+        default=24576,
+        help="Max sequence length (prompt + generation) reserved for the vLLM KV cache "
+             "(default: %(default)s). Unlike run_agent_fewshot.py's single extractor call, "
+             "each retry attempt's extractor prompt embeds the full critique history from "
+             "all prior attempts (AsyncABSASystem._format_critique_history), so later "
+             "attempts under a high --max_retries need more headroom on top of the "
+             "8192-thinking + up to 2048-answer generation budget. Raise --max_model_len "
+             "(not --gpu_memory_utilization) if you still see a KV-cache-too-small error.",
     )
     parser.add_argument(
         "--prompt_set",
