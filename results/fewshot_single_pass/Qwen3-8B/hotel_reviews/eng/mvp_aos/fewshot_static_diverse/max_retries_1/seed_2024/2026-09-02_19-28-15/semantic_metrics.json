@@ -1,0 +1,15 @@
+{
+  "path": "results/fewshot_single_pass/Qwen3-8B/hotel_reviews/eng/mvp_aos/fewshot_static_diverse/max_retries_1/seed_2024/2026-09-02_19-28-15/inference_results.json",
+  "runner_type": "fewshot_single_pass",
+  "model_name": "Qwen3-8B",
+  "dataset_type": "hotel_reviews",
+  "lang": "eng",
+  "dataset_folder": "mvp_aos",
+  "prompt_dir": "fewshot_static_diverse",
+  "max_retries": "max_retries_1",
+  "seed": "seed_2024",
+  "run_id": "2026-09-02_19-28-15",
+  "precision": 90.78156312625251,
+  "recall": 90.96385542168674,
+  "f1": 90.87261785356068
+}
